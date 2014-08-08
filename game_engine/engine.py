@@ -1,4 +1,12 @@
 from collections import defaultdict
+from itertools import izip
+
+from py2neo import node, rel
+from py2neo import neo4j
+from py2neo.packages.urimagic import URI
+import requests
+import json
+
 
 __author__ = 'kishanov'
 
@@ -7,8 +15,8 @@ import os
 
 db_url = os.environ.get("GRAPHENEDB_URL")
 
-# service_root = neo4j.ServiceRoot(URI(db_url).resolve("/"))
-# graph_db = service_root.graph_db
+service_root = neo4j.ServiceRoot(URI(db_url).resolve("/"))
+graph_db = service_root.graph_db
 
 
 def create_pristine_board(size=100):
@@ -73,12 +81,47 @@ def _parse_hackerrank_path(line):
     return paths
 
 
-# ladders = _parse_hackerrank_path("32,62 42,68 12,98")
-# snakes = _parse_hackerrank_path("95,13 97,25 93,37 79,27 75,19 49,47 67,17")
-#
-# print ladders
-# print snakes
-# print ladders + snakes
-#
-# print set_extra_paths(ladders + snakes, create_pristine_board())
+def persist_graph(board, graph_db):
+    nodes_in_db = graph_db.create(*[node(value=n) for n in board.keys()])
+    nodes = dict(izip(board.keys(), nodes_in_db))
+    edges = []
+
+    for src in board:
+        if board[src]:
+            for dst, cost in board[src].iteritems():
+                edges.append(rel(nodes[src], "to", nodes[dst], cost=cost))
+
+    graph_db.create(*edges)
+
+    return {"start": nodes_in_db[0], "finish": nodes_in_db[-1]}
+
+
+def win_game(start, finish):
+    url = db_url + "/db/data/node/" + str(start._id) + "/path"
+
+    query = {
+        "to": db_url + "/db/data/node/" + str(finish._id),
+        "cost_property": "cost",
+        "relationships": {
+            "type": "to",
+            "direction": "out"
+        },
+        "algorithm": "dijkstra"
+    }
+
+    print query
+
+    r = requests.post(url, data=json.dumps(query))
+
+    return [neo4j.Node(node)["value"] for node in r.json()['nodes']]
+
+
+ladders = _parse_hackerrank_path("32,62 42,68 12,98")
+snakes = _parse_hackerrank_path("95,13 97,25 93,37 79,27 75,19 49,47 67,17")
+
+board = set_extra_paths(ladders + snakes, create_pristine_board())
+
+boundaries = persist_graph(board, graph_db)
+
+print win_game(boundaries["start"], boundaries["finish"])
 
