@@ -23,23 +23,16 @@
 
 <div class="container" id="page-wrapper">
     <div class="header">
-        <ul class="nav nav-pills pull-right">
-{#            <li class="active"><a href="#">Home</a></li>#}
-        </ul>
         <h3 class="text-muted">Snakes and Ladders</h3>
     </div>
+
+    <hr>
 
     <div class="content">
         {% block body %}{% endblock %}
     </div>
-
-{#    <div class="footer">#}
-{#        <p>© Company 2014</p>#}
-{#    </div>#}
-
 </div>
 <!-- /container -->
-
 
 
 <script src="{{ url_for('static', filename='board.js') }}"></script>

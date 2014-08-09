@@ -1,9 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h4>Previously Played Games:</h4>
-    <ul>
-    {% for board in boards %}
-        <li><a href="/boards/{{ board._id }}">{{ board._id }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="row">
+
+        {# Previous Games list #}
+        <div class="col-xs-6">
+            <h4 class="sal-header">Previously Played Games:</h4>
+
+            <ul>
+                {% for board in boards %}
+                    <li><a href="/boards/{{ board._id }}">{{ board._id }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Generate Board Form #}
+        <div class="col-xs-6">
+            <h4 class="sal-header">New Game:</h4>
+
+            <form role="form" action="" method="post" name="new-game">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label for="laddersCount">Ladder's Count</label>
+                    {{ form.ladders_count(class_="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    <label for="snakesCount">Snake's Count</label>
+                    {{ form.snakes_count(class_="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-default">Generate</button>
+            </form>
+
+        </div>
+    </div>
 {% endblock %}

@@ -3,6 +3,7 @@
     <div class="row">
         <div class="col-xs-8">
             <h4>Board:</h4>
+
             <div id="game-board">
 
             </div>
@@ -12,7 +13,8 @@
             <h4>Movements</h4>
             <ol>
                 {% for move in moves %}
-                    <li><strong><em>{{ move.action }}</em></strong> on <strong>{{ move.step }}</strong>, moves from <strong>{{ move.src }}</strong> to <strong>{{ move.dst }}</strong></li>
+                    <li><strong><em>{{ move.action }}</em></strong> on <strong>{{ move.step }}</strong>, moves from
+                        <strong>{{ move.src }}</strong> to <strong>{{ move.dst }}</strong></li>
                 {% endfor %}
             </ol>
 

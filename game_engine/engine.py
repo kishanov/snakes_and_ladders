@@ -244,8 +244,12 @@ def generate_board(ladders_count, snakes_count, board_size=100):
     shuffle(valid_src_range)
     valid_destination_range = valid_src_range[(ladders_count + snakes_count):]
 
-    return {"ladders": _gen_valid_destinations(valid_src_range[:ladders_count], valid_destination_range, operator.gt),
-            "snakes": _gen_valid_destinations(valid_src_range[:ladders_count], valid_destination_range, operator.lt)}
+    return {"ladders": _gen_valid_destinations(valid_src_range[:ladders_count],
+                                               valid_destination_range,
+                                               operator.gt),
+            "snakes": _gen_valid_destinations(valid_src_range[ladders_count:(ladders_count + snakes_count)],
+                                              valid_destination_range,
+                                              operator.lt)}
 
 
 # save_board_to_db(from_hackerrank_paths("32,62 42,68 12,98"),
