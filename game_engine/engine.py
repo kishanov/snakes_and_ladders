@@ -102,7 +102,11 @@ def create_graph_in_db(board_id):
 
     GRAPH_DB.create(*edges)
 
-    return {"start": nodes_in_db[0], "finish": nodes_in_db[-1]}
+    return {"start": nodes_in_db[0],
+            "finish": nodes_in_db[-1],
+            "board": board,
+            "snakes": board_from_db["snakes"],
+            "ladders": board_from_db["ladders"]}
 
 
 def remove_temporary_nodes(board_id):
@@ -115,6 +119,24 @@ def remove_temporary_nodes(board_id):
 def _get_node_id(board_id, node_value):
     query = "MATCH n WHERE n.value = {0} AND n.board={1} RETURN n".format(node_value, board_id)
     return neo4j.CypherQuery(GRAPH_DB, query).execute_one()._id
+
+
+def get_src(jumps):
+    return [jump["src"] for jump in jumps]
+
+
+def detail_moves(moves, board, ladders, snakes):
+    solution = [{"src": moves[i], "dst": moves[i + 1]} for i in xrange(len(moves) - 1)]
+
+    for move in solution:
+        if move["src"] in get_src(ladders):
+            move["ladder"] = move["dst"] - move["src"]
+        elif move["src"] in get_src(snakes):
+            move["snake"] = move["dst"] - move["src"]
+        else:
+            move["roll"] = move["dst"] - move["src"]
+
+    return solution
 
 
 def win_game(board_id):
@@ -135,7 +157,7 @@ def win_game(board_id):
     r = requests.post(url, data=json.dumps(query))
     nodes = [neo4j.Node(node)["value"] for node in r.json()['nodes']]
     remove_temporary_nodes(board_id)
-    return nodes
+    return detail_moves(nodes, temp_graph["board"], temp_graph["ladders"], temp_graph["snakes"])
 
 
 def get_all_boards():
@@ -163,4 +185,6 @@ def sample_board_1():
 
 # save_board_to_db(from_hackerrank_paths("8,52 6,80 26,42 2,72"),
 #                  from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
+
+# print win_game(2318)
 
