@@ -1,2 +1,2 @@
 __author__ = 'kishanov'
-from engine import get_all_boards, get_board, sample_board_1
+from engine import get_all_boards, get_board, sample_board_1, win_game

@@ -129,12 +129,13 @@ def detail_moves(moves, board, ladders, snakes):
     solution = [{"src": moves[i], "dst": moves[i + 1]} for i in xrange(len(moves) - 1)]
 
     for move in solution:
+        move["step"] = move["dst"] - move["src"]
         if move["src"] in get_src(ladders):
-            move["ladder"] = move["dst"] - move["src"]
+            move["action"] = "Climbs ladder"
         elif move["src"] in get_src(snakes):
-            move["snake"] = move["dst"] - move["src"]
+            move["action"] = "Is digested by snake"
         else:
-            move["roll"] = move["dst"] - move["src"]
+            move["action"] = "Rolls dice"
 
     return solution
 

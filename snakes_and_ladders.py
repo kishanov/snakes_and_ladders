@@ -25,7 +25,8 @@ def sample_board():
 
 @app.route('/boards/<int:board_id>')
 def board_page(board_id):
-    return render_template('board_page.html')
+    moves = game_engine.win_game(board_id)
+    return render_template('board_page.html', moves=moves)
 
 
 if __name__ == '__main__':
