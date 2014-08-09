@@ -82,7 +82,8 @@ def _parse_hackerrank_path(line):
 
 
 def persist_graph(board, graph_db):
-    nodes_in_db = graph_db.create(*[node(value=n) for n in board.keys()])
+    board_id = graph_db.create(node(name="board"))[0]._id
+    nodes_in_db = graph_db.create(*[node(value=n, board=board_id) for n in board.keys()])
     nodes = dict(izip(board.keys(), nodes_in_db))
     edges = []
 
@@ -93,14 +94,22 @@ def persist_graph(board, graph_db):
 
     graph_db.create(*edges)
 
-    return {"start": nodes_in_db[0], "finish": nodes_in_db[-1]}
+    return board_id
 
 
-def win_game(start, finish):
-    url = db_url + "/db/data/node/" + str(start._id) + "/path"
+def _get_node_id(board_id, node_value):
+    query = "MATCH n WHERE n.value = {0} AND n.board={1} RETURN n".format(node_value, board_id)
+    return neo4j.CypherQuery(graph_db, query).execute_one()._id
+
+
+def win_game(board_id):
+    start_id = _get_node_id(board_id, 1)
+    finish_id = _get_node_id(board_id, 100)
+
+    url = "{0}/db/data/node/{1}/path".format(db_url, start_id)
 
     query = {
-        "to": db_url + "/db/data/node/" + str(finish._id),
+        "to": "{0}/db/data/node/{1}".format(db_url, finish_id),
         "cost_property": "cost",
         "relationships": {
             "type": "to",
@@ -109,19 +118,12 @@ def win_game(start, finish):
         "algorithm": "dijkstra"
     }
 
-    print query
-
     r = requests.post(url, data=json.dumps(query))
 
     return [neo4j.Node(node)["value"] for node in r.json()['nodes']]
 
 
-ladders = _parse_hackerrank_path("32,62 42,68 12,98")
-snakes = _parse_hackerrank_path("95,13 97,25 93,37 79,27 75,19 49,47 67,17")
-
-board = set_extra_paths(ladders + snakes, create_pristine_board())
-
-boundaries = persist_graph(board, graph_db)
-
-print win_game(boundaries["start"], boundaries["finish"])
+# ladders = _parse_hackerrank_path("32,62 42,68 12,98")
+# snakes = _parse_hackerrank_path("95,13 97,25 93,37 79,27 75,19 49,47 67,17")
+# board = set_extra_paths(ladders + snakes, create_pristine_board())
 
