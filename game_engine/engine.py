@@ -2,6 +2,8 @@ from collections import defaultdict
 from itertools import izip
 import json
 import os
+from random import randint, shuffle
+import operator
 
 from py2neo import node, rel
 from py2neo import neo4j
@@ -226,6 +228,26 @@ def sample_board_1():
     return set_extra_paths(ladders + snakes, create_pristine_board())
 
 
+def _gen_valid_destinations(sources, valid_destinations, comp_func):
+    shortcuts = []
+
+    for i in sources:
+        valid_dst_for_i = [x for x in valid_destinations if comp_func(x, i)]
+        j = randint(0, len(valid_dst_for_i) - 1)
+        shortcuts.append({"src": i, "dst": valid_dst_for_i[j]})
+
+    return shortcuts
+
+
+def generate_board(ladders_count, snakes_count, board_size=100):
+    valid_src_range = [i for i in xrange(2, board_size)]
+    shuffle(valid_src_range)
+    valid_destination_range = valid_src_range[(ladders_count + snakes_count):]
+
+    return {"ladders": _gen_valid_destinations(valid_src_range[:ladders_count], valid_destination_range, operator.gt),
+            "snakes": _gen_valid_destinations(valid_src_range[:ladders_count], valid_destination_range, operator.lt)}
+
+
 # save_board_to_db(from_hackerrank_paths("32,62 42,68 12,98"),
 # from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
 
@@ -233,7 +255,7 @@ def sample_board_1():
 # from_hackerrank_paths("85,7 63,31 87,13 75,11 89,33 57,5 71,15 55,25"))
 
 # save_board_to_db(from_hackerrank_paths("8,52 6,80 26,42 2,72"),
-#                  from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
+# from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
 
 # print win_game(2318)
 

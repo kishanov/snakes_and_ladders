@@ -17,10 +17,9 @@ def get_board(board_id):
     return jsonify(game_engine.get_board(board_id))
 
 
-@app.route('/api/boards/sample_board_1.json')
-def sample_board():
-    return jsonify({"board": game_engine.sample_board_1(),
-                    "id": 1})
+@app.route('/boards/generate', methods=["POST"])
+def generate_board(board_id):
+    return jsonify(game_engine.get_board(board_id))
 
 
 @app.route('/boards/<int:board_id>')
