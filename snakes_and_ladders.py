@@ -14,10 +14,21 @@ def index():
     return render_template('games_list.html', boards=boards)
 
 
-@app.route('/boards/<int:board_id>')
-def board_page(board_id):
+@app.route('/api/boards/<int:board_id>')
+def get_board(board_id):
     return json.dumps({"board": game_engine.get_board(board_id),
                        "id": board_id})
+
+
+@app.route('/api/boards/sample_board_1.json')
+def sample_board():
+    return json.dumps({"board": game_engine.sample_board_1(),
+                       "id": 1})
+
+
+@app.route('/boards/<int:board_id>')
+def board_page(board_id):
+    return render_template('board_page.html')
 
 
 if __name__ == '__main__':

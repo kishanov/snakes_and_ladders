@@ -140,8 +140,14 @@ def get_board(board_id):
                            create_pristine_board())
 
 
-persist_graph(from_hackerrank_paths("32,62 42,68 12,98"),
-              from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
+def sample_board_1():
+    ladders = from_hackerrank_paths("32,62 42,68 12,98")
+    snakes = from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17")
+    return set_extra_paths(ladders + snakes, create_pristine_board())
+
+
+# persist_graph(from_hackerrank_paths("32,62 42,68 12,98"),
+# from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
 
 #print get_board(908)
 
