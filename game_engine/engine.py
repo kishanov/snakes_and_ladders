@@ -135,9 +135,8 @@ def get_all_boards():
 def get_board(board_id):
     all_boards = [board for board in GRAPH_DB.find("board")]
     board = filter(lambda b: b._id == board_id, all_boards)[0]
-    return set_extra_paths(from_hackerrank_paths(board["ladders"]) +
-                           from_hackerrank_paths(board["snakes"]),
-                           create_pristine_board())
+    return {"ladders": from_hackerrank_paths(board["ladders"]),
+            "snakes": from_hackerrank_paths(board["snakes"])}
 
 
 def sample_board_1():
@@ -149,7 +148,7 @@ def sample_board_1():
 # persist_graph(from_hackerrank_paths("32,62 42,68 12,98"),
 # from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
 
-#print get_board(908)
+# print get_board(908)
 
 # print get_all_boards()
 # persist_graph(board)
