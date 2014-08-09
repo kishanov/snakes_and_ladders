@@ -109,17 +109,19 @@ var drawBoard = function (pathsData) {
 }
 
 
-var boardDataUrl = "/api/boards/" + _.last(location.pathname.split("/"));
+if (location.pathname.match(/^\/boards\/\d+$/)) {
+    var boardDataUrl = "/api/boards/" + _.last(location.pathname.split("/"));
 
-$.get(boardDataUrl, function (data) {
-    var ls = _.map(data.ladders, function (l) {
-        l.type = "ladder";
-        return l;
-    });
-    var ss = _.map(data.snakes, function (l) {
-        l.type = "snake";
-        return l;
-    });
+    $.get(boardDataUrl, function (data) {
+        var ls = _.map(data.ladders, function (l) {
+            l.type = "ladder";
+            return l;
+        });
+        var ss = _.map(data.snakes, function (l) {
+            l.type = "snake";
+            return l;
+        });
 
-    drawBoard(ls.concat(ss));
-});
+        drawBoard(ls.concat(ss));
+    });
+}
