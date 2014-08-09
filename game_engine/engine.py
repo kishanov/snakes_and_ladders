@@ -81,13 +81,16 @@ def from_hackerrank_paths(line):
     return paths
 
 
-def persist_graph(ladders, snakes):
-    board = set_extra_paths(ladders + snakes, create_pristine_board())
+def save_board_to_db(ladders, snakes):
     new_board = GRAPH_DB.create(node(snakes=to_hackerrank_paths(snakes),
                                      ladders=to_hackerrank_paths(ladders)))[0]
     new_board.add_labels("board")
-    board_id = new_board._id
+    return new_board._id
 
+
+def create_graph_in_db(board_id):
+    board_from_db = get_board(board_id)
+    board = set_extra_paths(board_from_db["ladders"] + board_from_db["snakes"], create_pristine_board())
     nodes_in_db = GRAPH_DB.create(*[node(value=n, board=board_id) for n in board.keys()])
     nodes = dict(izip(board.keys(), nodes_in_db))
     edges = []
@@ -99,7 +102,14 @@ def persist_graph(ladders, snakes):
 
     GRAPH_DB.create(*edges)
 
-    return board_id
+    return {"start": nodes_in_db[0], "finish": nodes_in_db[-1]}
+
+
+def remove_temporary_nodes(board_id):
+    q1 = "MATCH (n)-[r]-() WHERE n.board = {0} DELETE n, r".format(board_id)
+    q2 = "MATCH n WHERE n.board = {0} DELETE n".format(board_id)
+    neo4j.CypherQuery(GRAPH_DB, q1).execute_one()
+    neo4j.CypherQuery(GRAPH_DB, q2).execute_one()
 
 
 def _get_node_id(board_id, node_value):
@@ -108,13 +118,12 @@ def _get_node_id(board_id, node_value):
 
 
 def win_game(board_id):
-    start_id = _get_node_id(board_id, 1)
-    finish_id = _get_node_id(board_id, 100)
+    temp_graph = create_graph_in_db(board_id)
 
-    url = "{0}/db/data/node/{1}/path".format(DB_URL, start_id)
+    url = "{0}/db/data/node/{1}/path".format(DB_URL, temp_graph["start"]._id)
 
     query = {
-        "to": "{0}/db/data/node/{1}".format(DB_URL, finish_id),
+        "to": "{0}/db/data/node/{1}".format(DB_URL, temp_graph["finish"]._id),
         "cost_property": "cost",
         "relationships": {
             "type": "to",
@@ -124,8 +133,9 @@ def win_game(board_id):
     }
 
     r = requests.post(url, data=json.dumps(query))
-
-    return [neo4j.Node(node)["value"] for node in r.json()['nodes']]
+    nodes = [neo4j.Node(node)["value"] for node in r.json()['nodes']]
+    remove_temporary_nodes(board_id)
+    return nodes
 
 
 def get_all_boards():
@@ -145,10 +155,12 @@ def sample_board_1():
     return set_extra_paths(ladders + snakes, create_pristine_board())
 
 
-# persist_graph(from_hackerrank_paths("32,62 42,68 12,98"),
-# from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
+# save_board_to_db(from_hackerrank_paths("32,62 42,68 12,98"),
+#                  from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
 
-# print get_board(908)
+# save_board_to_db(from_hackerrank_paths("32,62 44,66 22,58 34,60 2,90"),
+#                  from_hackerrank_paths("85,7 63,31 87,13 75,11 89,33 57,5 71,15 55,25"))
 
-# print get_all_boards()
-# persist_graph(board)
+# save_board_to_db(from_hackerrank_paths("8,52 6,80 26,42 2,72"),
+#                  from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
+
