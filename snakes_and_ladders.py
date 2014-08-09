@@ -25,7 +25,7 @@ def sample_board():
 
 @app.route('/boards/<int:board_id>')
 def board_page(board_id):
-    moves = game_engine.win_game(board_id)
+    moves = game_engine.solve_board(board_id)
     return render_template('board_page.html', moves=moves)
 
 

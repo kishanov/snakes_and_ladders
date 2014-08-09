@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+    <h4>Previously Played Games:</h4>
     <ul>
     {% for board in boards %}
         <li><a href="/boards/{{ board._id }}">{{ board._id }}</a></li>

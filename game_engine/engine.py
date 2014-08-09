@@ -60,6 +60,13 @@ def set_extra_paths(paths, board):
 
 
 def to_hackerrank_paths(paths):
+    """
+    Utility function, which does the following conversion:
+    [{'src': 32, 'dst': 62}, {'src': 42, 'dst': 68}, {'src': 12, 'dst': 98}] -> "32,62 42,68 12,98"
+
+    :param paths:
+    :return:
+    """
     return " ".join(["{0},{1}".format(p["src"], p["dst"]) for p in paths])
 
 
@@ -82,6 +89,13 @@ def from_hackerrank_paths(line):
 
 
 def save_board_to_db(ladders, snakes):
+    """
+    Creates a single Node, representing a board in database.
+
+    :param ladders:
+    :param snakes:
+    :return:
+    """
     new_board = GRAPH_DB.create(node(snakes=to_hackerrank_paths(snakes),
                                      ladders=to_hackerrank_paths(ladders)))[0]
     new_board.add_labels("board")
@@ -110,6 +124,12 @@ def create_graph_in_db(board_id):
 
 
 def remove_temporary_nodes(board_id):
+    """
+    Cleans up all nodes and relations, created during board persistence in database.
+
+    :param board_id:
+    :return:
+    """
     q1 = "MATCH (n)-[r]-() WHERE n.board = {0} DELETE n, r".format(board_id)
     q2 = "MATCH n WHERE n.board = {0} DELETE n".format(board_id)
     neo4j.CypherQuery(GRAPH_DB, q1).execute_one()
@@ -125,7 +145,16 @@ def get_src(jumps):
     return [jump["src"] for jump in jumps]
 
 
-def detail_moves(moves, board, ladders, snakes):
+def _annotate_moves(moves, ladders, snakes):
+    """
+    Annotates simple path, calculated by Neo4J Dijkstra's algorithm call
+    with meaningful, game-specific comments.
+
+    :param moves: A list of all nodes in the path, starting from 1 and ending on 100
+    :param ladders: ladders in [{"src":..., "dst":...}] representation
+    :param snakes: snakes in [{"src":..., "dst":...}] representation
+    :return: for each moves return a dict {"src":int, "dst":int, "action":string, "step":int}
+    """
     solution = [{"src": moves[i], "dst": moves[i + 1]} for i in xrange(len(moves) - 1)]
 
     for move in solution:
@@ -140,7 +169,15 @@ def detail_moves(moves, board, ladders, snakes):
     return solution
 
 
-def win_game(board_id):
+def solve_board(board_id):
+    """
+    Finds a shortest path (sequence of dice rolls, snakes and ladders) to reach from 1 to 100.
+    During it's execution temporarily create a graph which represents game board in Neo4J.
+    The shortest path is found using Neo4J's implementation of Dijktra's algorithm.
+
+    :param board_id:
+    :return: Annotated sequence of moves to reach from 1 to 100.
+    """
     temp_graph = create_graph_in_db(board_id)
 
     url = "{0}/db/data/node/{1}/path".format(DB_URL, temp_graph["start"]._id)
@@ -156,16 +193,27 @@ def win_game(board_id):
     }
 
     r = requests.post(url, data=json.dumps(query))
-    nodes = [neo4j.Node(node)["value"] for node in r.json()['nodes']]
+    nodes = [neo4j.Node(n)["value"] for n in r.json()['nodes']]
     remove_temporary_nodes(board_id)
-    return detail_moves(nodes, temp_graph["board"], temp_graph["ladders"], temp_graph["snakes"])
+    return _annotate_moves(nodes, temp_graph["ladders"], temp_graph["snakes"])
 
 
 def get_all_boards():
+    """
+    Finds all boards in database.
+
+    :return: list of Py2Neo Node elements (each Node has a metadata about a board)
+    """
     return [board for board in GRAPH_DB.find("board")]
 
 
 def get_board(board_id):
+    """
+    Finds single board in database.
+
+    :param board_id:
+    :return: a dict of {"snakes": [...], "ladders": [...]}, each in {"src":int, "dst":int} format.
+    """
     all_boards = [board for board in GRAPH_DB.find("board")]
     board = filter(lambda b: b._id == board_id, all_boards)[0]
     return {"ladders": from_hackerrank_paths(board["ladders"]),
@@ -179,10 +227,10 @@ def sample_board_1():
 
 
 # save_board_to_db(from_hackerrank_paths("32,62 42,68 12,98"),
-#                  from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
+# from_hackerrank_paths("95,13 97,25 93,37 79,27 75,19 49,47 67,17"))
 
 # save_board_to_db(from_hackerrank_paths("32,62 44,66 22,58 34,60 2,90"),
-#                  from_hackerrank_paths("85,7 63,31 87,13 75,11 89,33 57,5 71,15 55,25"))
+# from_hackerrank_paths("85,7 63,31 87,13 75,11 89,33 57,5 71,15 55,25"))
 
 # save_board_to_db(from_hackerrank_paths("8,52 6,80 26,42 2,72"),
 #                  from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
