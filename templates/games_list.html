@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block body %}
+    <ul>
+    {% for board in boards %}
+        <li><a href="/boards/{{ board._id }}">{{ board._id }}</a></li>
+    {% endfor %}
+    </ul>
+{% endblock %}
