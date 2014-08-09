@@ -1,7 +1,5 @@
 'use strict';
 
-console.log("hello");
-
 var cellsCount = 100;
 var cellsInRow = 10;
 var cellWidth = 40;
@@ -31,10 +29,39 @@ var rectAttributes = cells
     .attr("y", function (d) {
         return Math.floor(d / cellsInRow) * cellWidth;
     })
-    .style("stroke", "black")
-    .style("stroke-width", 3)
-    .style("opacity", 0.5)
-    .style("fill", "crimson");
+    .style("stroke", "gray")
+    .style("stroke-width", 2)
+    .style("fill", "#FFEFD5");
+
+
+var getX = function (cellNumber) {
+    var pos = (cellNumber % cellsInRow) * cellWidth + (cellWidth / 2);
+    if (Math.floor(cellNumber / cellsInRow) % 2 == 0) {
+        return pos;
+    } else {
+        return boardWidth - pos;
+    }
+}
+
+var getXSrc = function (path) {
+    return getX(path.src - 1);
+}
+
+var getXDst = function (path) {
+    return getX(path.dst - 1);
+}
+
+var getYSrc = function (path) {
+    return getY(path.src - 1);
+}
+
+var getYDst = function (path) {
+    return getY(path.dst - 1);
+}
+
+var getY = function (cellNumber) {
+    return boardWidth - Math.floor(cellNumber / cellsInRow) * cellWidth + (cellWidth / 3 * 2) - cellWidth;
+}
 
 
 var labels = board.selectAll("text")
@@ -45,20 +72,41 @@ var labels = board.selectAll("text")
 
 var textAttributes = labels
     .text(function (d) {
-        console.log(d);
         return d + 1;
     })
-    .attr("x", function (d) {
-        var pos = (d % cellsInRow) * cellWidth + (cellWidth / 2);
-        if (Math.floor(d / cellsInRow) % 2 == 0) {
-            return pos;
-        } else {
-            return boardWidth - pos;
-        }
-    })
-    .attr("y", function (d) {
-        return boardWidth - Math.floor(d / cellsInRow) * cellWidth + (cellWidth / 3 * 2) - cellWidth;
-    })
+    .attr("x", getX)
+    .attr("y", getY)
     .style("fill", "black")
     .style("font-size", labelFontSize)
     .style("text-anchor", "middle");
+
+
+var pathsData = [
+    {src: 12, dst: 98, type: "ladder"},
+    {src: 32, dst: 62, type: "ladder"},
+    {src: 42, dst: 68, type: "ladder"},
+    {src: 95, dst: 25, type: "snake"},
+    {src: 21, dst: 3, type: "snake"}
+];
+
+
+var paths = board.selectAll("line")
+    .data(pathsData)
+    .enter()
+    .append("line");
+
+
+paths.attr("x1", getXSrc)
+    .attr("y1", getYSrc)
+    .attr("x2", getXDst)
+    .attr("y2", getYDst)
+    .style("stroke", function (path) {
+        return path.type == "ladder" ? "FF0086" : "3B916A";
+    })
+    .style("stroke-dasharray", function (path) {
+        return path.type == "ladder" ? "1" : "8,2";
+    })
+    .style("stroke-width", 10);
+
+
+
