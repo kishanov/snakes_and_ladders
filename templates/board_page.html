@@ -10,12 +10,21 @@
         </div>
 
         <div class="col-xs-4">
-            <h4>Movements</h4>
+            <h4>Movements:</h4>
             <button class="btn btn-default" id="show-moves-btn">Show Movements</button>
             <ol style="display: none;" id="annotated-moves">
                 {% for move in moves %}
-                    <li><strong><em>{{ move.action }}</em></strong> on <strong>{{ move.step }}</strong>, moves from
-                        <strong>{{ move.src }}</strong> to <strong>{{ move.dst }}</strong></li>
+                    <li style="margin-top: 3px">
+                        {% if move.action == 'Rolls dice' %}
+                            <img src="/static/img/dice{{ move.step }}.png" width="30" height="30">
+                        {% else %}
+                            {% if move.action == 'Climbs ladder' %}
+                                <img src="/static/img/ladder.png" width="30" height="30">
+                            {% else %}
+                                <img src="/static/img/snake.png" width="30" height="30">
+                            {% endif %}
+                        {% endif %}, moves from <strong>{{ move.src }}</strong> to <strong>{{ move.dst }}</strong>
+                    </li>
                 {% endfor %}
             </ol>
 
