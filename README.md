@@ -16,17 +16,17 @@ Solution Approach
 -----------------
 
 * For a given combination of snakes and ladders, create a single node with a label `board` in Neo4J and associate information about snakes and ladders as a metadata (technically, strings in Hackerrank's format associated with node properties). This is my 2nd attempt and a dirty hack, cause initial implementation which stored the whole board as a graph had 3 problems:
-** Free version of GrapheneDB allows only 1K nodes and 10K relations for free and in my case each board required 100 nodes and several hundreds of relations.
-** Querying a lot of nodes without creating an index is slow
-** py2neo has an interesting way of working with database which for bulk requests were slow (see more details in "Lessons Learned" section)
+    * Free version of GrapheneDB allows only 1K nodes and 10K relations for free and in my case each board required 100 nodes and several hundreds of relations.
+    * Querying a lot of nodes without creating an index is slow
+    * py2neo has an interesting way of working with database which for bulk requests were slow (see more details in "Lessons Learned" section)
 * To solve a board, do the following steps:
-** Create a temporary set do nodes and relations which represents a board with snakes and ladders as a graph
-** Call Dijkstra's algorithm on them and collect results
-** Remove temporary data
+    * Create a temporary set do nodes and relations which represents a board with snakes and ladders as a graph
+    * Call Dijkstra's algorithm on them and collect results
+    * Remove temporary data
 * To draw a board, to the following:
-** Create an in-memory board representation
-** Send it to front-end as a JSON
-** Bind this data to D3.js-defined `<svg>` element
+    * Create an in-memory board representation
+    * Send it to front-end as a JSON
+    * Bind this data to D3.js-defined `<svg>` element
 
 *Graph Representation*
 
