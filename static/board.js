@@ -1,13 +1,5 @@
 'use strict';
 
-var pathsData = [
-    {src: 12, dst: 98, type: "ladder"},
-    {src: 32, dst: 62, type: "ladder"},
-    {src: 42, dst: 68, type: "ladder"},
-    {src: 95, dst: 25, type: "snake"},
-    {src: 21, dst: 3, type: "snake"}
-];
-
 var drawBoard = function (pathsData) {
     var cellsCount = 100;
     var cellsInRow = 10;
@@ -78,7 +70,7 @@ var drawBoard = function (pathsData) {
         .append("text");
 
 
-    var textAttributes = labels
+    labels
         .text(function (d) {
             return d + 1;
         })
@@ -125,3 +117,8 @@ if (location.pathname.match(/^\/boards\/\d+$/)) {
         drawBoard(ls.concat(ss));
     });
 }
+
+$("#show-moves-btn").click(function () {
+    $("#annotated-moves").toggle();
+});
+

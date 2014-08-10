@@ -11,7 +11,8 @@
 
         <div class="col-xs-4">
             <h4>Movements</h4>
-            <ol>
+            <button class="btn btn-default" id="show-moves-btn">Show Movements</button>
+            <ol style="display: none;" id="annotated-moves">
                 {% for move in moves %}
                     <li><strong><em>{{ move.action }}</em></strong> on <strong>{{ move.step }}</strong>, moves from
                         <strong>{{ move.src }}</strong> to <strong>{{ move.dst }}</strong></li>
