@@ -28,7 +28,7 @@ Solution Approach
     * Send it to front-end as a JSON
     * Bind this data to D3.js-defined `<svg>` element
 
-*Graph Representation*
+### Graph Representation ###
 
 The whole board is represented as a graph with cells being nodes, jumps (either dice rolls, snakes or ladders) being edges with a weight. Note that for the sake of Dijkstra's correct execution, edge costs should be non-negative. I made the following assumption:
 
@@ -36,10 +36,23 @@ The whole board is represented as a graph with cells being nodes, jumps (either 
 * All ladders should have a weight of 0 (player's chip will be automatically moved to the end of the ladder with no cost)
 * All snakes is a tax to our movement, which means that their cost can be calculated as `destination - source`
 
-*Sample Graph*
+### Sample Graph ###
 
 This is a subset of a graph representing a board with a ladder from 2 to 20 and a snake from 8 to 1.
 
 
 ![Sample Graph](https://chart.googleapis.com/chart?chl=digraph+G+%7B%0D%0A++1+-%3E+2+%5Blabel%3D%22cost%3A1%22%5D%3B%0D%0A++1+-%3E+3+%5Blabel%3D%22cost%3A2%22%5D%3B%0D%0A++1+-%3E+4+%5Blabel%3D%22cost%3A3%22%5D%3B%0D%0A++1+-%3E+5+%5Blabel%3D%22cost%3A4%22%5D%3B%0D%0A++1+-%3E+6+%5Blabel%3D%22cost%3A5%22%5D%3B%0D%0A++1+-%3E+7+%5Blabel%3D%22cost%3A6%22%5D%3B%0D%0A++2+-%3E+3+%5Blabel%3D%22cost%3A1%22%5D%3B%0D%0A++2+-%3E+4+%5Blabel%3D%22cost%3A2%22%5D%3B%0D%0A++2+-%3E+5+%5Blabel%3D%22cost%3A3%22%5D%3B%0D%0A++2+-%3E+6+%5Blabel%3D%22cost%3A4%22%5D%3B%0D%0A++2+-%3E+7+%5Blabel%3D%22cost%3A5%22%5D%3B%0D%0A++2+-%3E+8+%5Blabel%3D%22cost%3A6%22%5D%3B%0D%0A++2+-%3E+20+%5Blabel%3D%22cost%3A0%5Cntype%3Aladder%22%5D%3B%0D%0A++8+-%3E+1+%5Blabel%3D%22cost%3A7%5Cntype%3Asnake%22%5D%3B%0D%0A%7D%0D%0A++++++++&cht=gv)
 
+
+Lessons Learned
+---------------
+
+* **Neo4J**
+    * To access the full power of Neo4J I had to use REST API directly with `requests`. Things like Dijkstra's algorithm are not available through existing API clients.
+    * Mapping graph to Python's object model is weird. I haven't found beautiful way to map between adjacency list (using dict) and Py2neo object model
+    * Working with labels requires 2 roundtrips to the database and 2 API calls, which slows everything down for massive operations
+* **D3.js**
+    * Haven't found the way to easily combine D3.js with ReactJS. Decided not to use React for this project, rendered everything using either D3.js + JQuery or server-side templating
+    * Drawing an arrow with arrow pointer is a rocket science for me :) Settled on a simple SVG line without pointer.
+* **Other**
+    * Python has a useful module `operator`, which contains `operator.lt` and `operator.gt` - compare functions that can be passed to other functions. My board generator was refactored using it.
