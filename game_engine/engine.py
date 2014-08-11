@@ -13,8 +13,9 @@ import requests
 
 DB_URL = os.environ.get("GRAPHENEDB_URL")
 
-service_root = neo4j.ServiceRoot(URI(DB_URL).resolve("/"))
-GRAPH_DB = service_root.graph_db
+if DB_URL:
+    service_root = neo4j.ServiceRoot(URI(DB_URL).resolve("/"))
+    GRAPH_DB = service_root.graph_db
 
 
 def create_pristine_board(size=100):
@@ -56,6 +57,7 @@ def set_extra_paths(paths, board):
     new_board = board.copy()
 
     for path in paths:
+        new_board[path["src"]] = {}
         new_board[path["src"]][path["dst"]] = distance(path["src"], path["dst"])
 
     return new_board
@@ -262,4 +264,8 @@ def generate_board(ladders_count, snakes_count, board_size=100):
 # from_hackerrank_paths("51,19 39,11 37,29 81,3 59,5 79,23 53,7 43,33 77,21"))
 
 # print win_game(2318)
+
+# save_board_to_db(
+#     from_hackerrank_paths("28,64 24,98 14,76 4,56 54,92 18,90 20,68 46,84 8,80 48,88 44,60 26,96 52,66 34,72"),
+#     from_hackerrank_paths("61,43 87,3 95,33 69,27 71,19 57,47 81,39 73,5 89,45 97,13 99,37"))
 
